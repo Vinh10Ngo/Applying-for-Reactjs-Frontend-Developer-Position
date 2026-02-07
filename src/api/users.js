@@ -16,14 +16,30 @@ function usersQuery(params = {}) {
   return q.toString()
 }
 
+/** Lọc user theo search (email, name, fullName) – dùng khi backend không hỗ trợ search_term */
+function filterUsersBySearch(list, searchVal) {
+  if (!list?.length || !searchVal || !String(searchVal).trim()) return list
+  const q = String(searchVal).trim().toLowerCase()
+  return list.filter(
+    (u) =>
+      (u.email || '').toLowerCase().includes(q) ||
+      (u.name || '').toLowerCase().includes(q) ||
+      (u.fullName || '').toLowerCase().includes(q)
+  )
+}
+
 export async function getUsers(params = {}) {
   if (useMock) return mockApi.getUsers(params)
   const query = usersQuery(params)
   const url = query ? `/users?${query}` : '/users'
   const res = await request(url)
-  const list = Array.isArray(res) ? res : (res?.users ?? res?.items ?? [])
+  let list = Array.isArray(res) ? res : (res?.users ?? res?.items ?? [])
+  const searchVal = params.search != null && params.search !== '' ? String(params.search).trim() : ''
+  if (searchVal) {
+    list = filterUsersBySearch(list, searchVal)
+  }
   const total = res?.total ?? list.length
-  return { items: list, total, page: params.page ?? 1, limit: params.limit ?? 10 }
+  return { items: list, total: list.length, page: params.page ?? 1, limit: params.limit ?? 10 }
 }
 
 export async function updateUserRole(userId, role) {

@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { getUsers, updateUserRole } from '../../api/users'
 import { useAuth } from '../../contexts/AuthContext'
 import '../../components/layout/Layout.css'
 
 const LIMIT = 10
+const SEARCH_DEBOUNCE_MS = 350
 
 export default function AdminUsersPage() {
   const { user: currentUser, loadUser } = useAuth()
@@ -12,6 +13,7 @@ export default function AdminUsersPage() {
   const [searchInput, setSearchInput] = useState('')
   const [loading, setLoading] = useState(true)
   const [updating, setUpdating] = useState(null)
+  const debounceRef = useRef(null)
 
   const fetchUsers = (page, searchTerm) => {
     setLoading(true)
@@ -32,6 +34,20 @@ export default function AdminUsersPage() {
   useEffect(() => {
     fetchUsers(data.page, search)
   }, [data.page, search])
+
+  // Tìm theo từng ký tự (debounce) – gõ xong tự lọc
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+    debounceRef.current = setTimeout(() => {
+      const q = (typeof searchInput === 'string' ? searchInput : '').trim()
+      setSearch(q)
+      setData((d) => ({ ...d, page: 1 }))
+      debounceRef.current = null
+    }, SEARCH_DEBOUNCE_MS)
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current)
+    }
+  }, [searchInput])
 
   const handleSearch = () => {
     const q = (typeof searchInput === 'string' ? searchInput : '').trim()

@@ -139,10 +139,11 @@ export const mockApi = {
   getUsers({ page = 1, limit = 10, search = '' } = {}) {
     let list = load('users').map(({ password: _, ...u }) => u)
     if (search) {
-      const q = search.toLowerCase()
+      const q = search.toLowerCase().trim()
       list = list.filter((u) =>
         (u.email || '').toLowerCase().includes(q) ||
-        (u.name || '').toLowerCase().includes(q)
+        (u.name || '').toLowerCase().includes(q) ||
+        (u.fullName || '').toLowerCase().includes(q)
       )
     }
     const total = list.length
