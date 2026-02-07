@@ -23,6 +23,17 @@ npm run build
 
 Trên từng nền tảng bên dưới, cấu hình **Environment Variable** / **Build env** với key **`VITE_API_URL`** và value là URL API của bạn.
 
+**Quan trọng (Vite):** Sau khi sửa `VITE_API_URL` trên Vercel/Netlify, **bắt buộc Redeploy** frontend thì giá trị mới có hiệu lực (biến được nhúng lúc build).
+
+---
+
+### Khắc phục "Không kết nối được máy chủ"
+
+1. **Đã Redeploy frontend chưa?** Sửa env → **Deployments** → ⋯ → **Redeploy**.
+2. **Backend có mở được không?** Thử mở trong trình duyệt: `https://<backend-url>/api/v1` (hoặc `/api/v1/health` nếu có). Nếu không mở được → backend chưa chạy hoặc URL sai.
+3. **CORS:** Backend phải cho phép origin frontend (vd: `https://applying-for-reactjs-frontend-devel.vercel.app`). Nếu không, trình duyệt chặn request → "Failed to fetch".
+4. **Xem lỗi cụ thể:** Mở site frontend → F12 → **Network** → thử Đăng nhập → bấm vào request đỏ (failed) xem **Status** và **Response** (CORS, 404, 500…).
+
 ---
 
 ## 3. Vercel (nhanh, miễn phí)

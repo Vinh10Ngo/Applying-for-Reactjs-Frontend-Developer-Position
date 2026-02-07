@@ -64,7 +64,10 @@ export function AuthProvider({ children }) {
     } catch (e) {
       const msg = e?.message || ''
       if (msg === 'Failed to fetch' || msg.includes('fetch')) {
-        throw new Error('Không kết nối được máy chủ. Hãy chạy backend (ví dụ port 3000) hoặc xóa/để trống VITE_API_URL trong file .env rồi chạy lại "npm run dev" để dùng dữ liệu mẫu (đăng nhập: user@test.com / user123).')
+        const hint = typeof window !== 'undefined' && !window.location.hostname.includes('localhost')
+          ? ' Đã deploy: kiểm tra CORS trên backend (cho phép origin frontend) và Redeploy frontend sau khi set VITE_API_URL.'
+          : ' Hãy chạy backend (vd port 3000) hoặc xóa/để trống VITE_API_URL trong .env rồi "npm run dev" để dùng mock (user@test.com / user123).'
+        throw new Error('Không kết nối được máy chủ.' + hint)
       }
       throw e
     }
