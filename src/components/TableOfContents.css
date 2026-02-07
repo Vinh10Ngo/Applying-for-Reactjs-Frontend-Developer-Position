@@ -1,0 +1,41 @@
+.toc {
+  padding: 1rem 1.25rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius);
+  margin-bottom: 1.5rem;
+}
+
+.toc-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin: 0 0 0.75rem;
+  color: var(--text);
+}
+
+.toc-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.toc-item {
+  margin-bottom: 0.35rem;
+}
+
+.toc-link {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.toc-link:hover {
+  color: var(--accent);
+}
+
+/* Sticky TOC khi có sidebar (desktop) */
+.toc-sticky {
+  position: sticky;
+  top: 5rem;
+}

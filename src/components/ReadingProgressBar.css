@@ -1,0 +1,10 @@
+.reading-progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent) 0%, var(--accent-end) 100%);
+  z-index: 100;
+  transition: width 0.1s ease-out;
+  pointer-events: none;
+}
