@@ -72,5 +72,13 @@ Mặc định app chạy với **dữ liệu mock** (localStorage). Để dùng 
 ## Scripts
 
 - `npm run dev` — Chạy dev server
-- `npm run build` — Build production
-- `npm run preview` — Xem bản build
+- `npm run build` — Build production (ra thư mục `dist/`)
+- `npm run preview` — Xem bản build local
+
+## Deploy lên mạng
+
+1. **Build:** Trong thư mục project chạy `npm run build` → thư mục `dist/` chứa file tĩnh.
+2. **Host:** Đẩy `dist/` lên bất kỳ host tĩnh nào (Vercel, Netlify, GitHub Pages, …).
+3. **API production:** Trên host, cấu hình biến môi trường **`VITE_API_URL`** = URL API backend (vd: `https://api.example.com/api/v1`). Build lại trên host hoặc set env trước khi build.
+
+Chi tiết từng bước cho **Vercel**, **Netlify**, **GitHub Pages** xem **`docs/DEPLOY.md`**.
