@@ -3,11 +3,13 @@ import { request } from './client'
 
 const useMock = !import.meta.env.VITE_API_URL
 
-/** GET /users – danh sách user (admin). Backend có thể trả mảng trực tiếp hoặc { items, total }. */
+const USERS_FETCH_LIMIT = 200
+
+/** Query string cho GET /users – gửi limit lớn để lấy hết rồi phân trang phía client (tránh backend trả sai page). */
 function usersQuery(params = {}) {
   const q = new URLSearchParams()
-  if (params.page != null) q.set('page', params.page)
-  if (params.limit != null) q.set('limit', params.limit)
+  q.set('page', 1)
+  q.set('limit', USERS_FETCH_LIMIT)
   const searchVal = params.search != null && params.search !== '' ? String(params.search).trim() : ''
   if (searchVal) {
     q.set('search_term', searchVal)
@@ -16,7 +18,7 @@ function usersQuery(params = {}) {
   return q.toString()
 }
 
-/** Lọc user theo search (email, name, fullName) – dùng khi backend không hỗ trợ search_term */
+/** Lọc user theo search (email, name, fullName) – khi backend không hỗ trợ search_term */
 function filterUsersBySearch(list, searchVal) {
   if (!list?.length || !searchVal || !String(searchVal).trim()) return list
   const q = String(searchVal).trim().toLowerCase()
@@ -35,11 +37,13 @@ export async function getUsers(params = {}) {
   const res = await request(url)
   let list = Array.isArray(res) ? res : (res?.users ?? res?.items ?? [])
   const searchVal = params.search != null && params.search !== '' ? String(params.search).trim() : ''
-  if (searchVal) {
-    list = filterUsersBySearch(list, searchVal)
-  }
-  const total = res?.total ?? list.length
-  return { items: list, total: list.length, page: params.page ?? 1, limit: params.limit ?? 10 }
+  if (searchVal) list = filterUsersBySearch(list, searchVal)
+  const total = list.length
+  const page = Math.max(1, parseInt(params.page, 10) || 1)
+  const limit = Math.max(1, parseInt(params.limit, 10) || 10)
+  const start = (page - 1) * limit
+  const items = list.slice(start, start + limit)
+  return { items, total, page, limit }
 }
 
 export async function updateUserRole(userId, role) {
