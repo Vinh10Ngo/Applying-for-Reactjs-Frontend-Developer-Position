@@ -1,0 +1,9 @@
+/* Global app styles - layout components have Layout.css */
+.app {
+  min-height: 100vh;
+}
+
+a.btn {
+  text-decoration: none;
+  display: inline-block;
+}
