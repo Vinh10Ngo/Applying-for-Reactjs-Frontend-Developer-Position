@@ -2,6 +2,8 @@
 
 Dùng bảng dưới để test thủ công sau khi chạy `npm run dev` và mở http://localhost:5173
 
+**Đánh giá code (logic):** Route bảo vệ (ProtectedRoute, AdminRoute), Auth mock/API, bài nháp/chưa đăng nhập không xem được, TOC + Reading progress bar, Admin user/bài (tìm, phân trang, đặt admin) đã có trong code. Cần test thủ công theo bảng dưới để xác nhận trên trình duyệt.
+
 ---
 
 ## 1. Đăng ký / Đăng nhập

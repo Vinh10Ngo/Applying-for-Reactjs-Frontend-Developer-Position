@@ -34,6 +34,20 @@
   color: var(--accent);
 }
 
+.toc-empty {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.toc-empty code {
+  background: var(--bg-elevated);
+  padding: 0.15em 0.4em;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+
 /* Sticky TOC khi có sidebar (desktop) */
 .toc-sticky {
   position: sticky;

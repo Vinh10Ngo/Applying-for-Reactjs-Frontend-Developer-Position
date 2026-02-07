@@ -25,8 +25,6 @@ export default function ArticleDetailPage() {
 
   const rawContent = article?.content != null ? String(article.content) : ''
   const { toc, blocks } = useMemo(() => parseArticleContent(rawContent), [rawContent])
-  const hasToc = toc.length > 0
-
   if (!id || id === 'undefined') {
     navigate('/', { replace: true })
     return null
@@ -65,12 +63,10 @@ export default function ArticleDetailPage() {
           <p><strong>Bản nháp</strong> – Chỉ bạn (hoặc admin) mới xem được. Muốn hiển thị cho mọi người thì nhấn <Link to={`/articles/${id}/edit`}>Sửa bài</Link> và bật &quot;Đã xuất bản&quot;.</p>
         </div>
       )}
-      <div className={`article-layout${hasToc ? ' article-layout--with-toc' : ''}`}>
-        {hasToc && (
-          <aside className="article-toc-wrap">
-            <TableOfContents items={toc} />
-          </aside>
-        )}
+      <div className="article-layout article-layout--with-toc">
+        <aside className="article-toc-wrap">
+          <TableOfContents items={toc} />
+        </aside>
         <article ref={articleRef} className="card-item article-content">
           <h1>{article.title}</h1>
           <div className="meta">Tác giả: {article.authorName} · {article.createdAt ? new Date(article.createdAt).toLocaleString('vi-VN') : ''}</div>
