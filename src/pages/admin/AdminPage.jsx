@@ -17,6 +17,11 @@ export default function AdminPage() {
           <h2>Quản lý bài viết</h2>
           <p>Xem tất cả bài (kể cả nháp, đã xóa), sửa/xóa/khôi phục.</p>
         </Link>
+        <Link to="/admin/audit" className="admin-card">
+          <span className="admin-card-icon">📋</span>
+          <h2>Nhật ký hoạt động</h2>
+          <p>Xem lịch sử thao tác: tạo/sửa/xóa bài, đăng nhập.</p>
+        </Link>
       </div>
     </div>
   )

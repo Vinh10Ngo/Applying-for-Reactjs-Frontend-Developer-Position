@@ -14,6 +14,7 @@ import ProfileArticlesPage from './pages/profile/ProfileArticlesPage'
 import AdminPage from './pages/admin/AdminPage'
 import AdminUsersPage from './pages/admin/AdminUsersPage'
 import AdminArticlesPage from './pages/admin/AdminArticlesPage'
+import AdminAuditPage from './pages/admin/AdminAuditPage'
 import './styles/App.css'
 
 export default function App() {
@@ -33,6 +34,7 @@ export default function App() {
             <Route path="admin" element={<AdminRoute><AdminPage /></AdminRoute>} />
             <Route path="admin/users" element={<AdminRoute><AdminUsersPage /></AdminRoute>} />
             <Route path="admin/articles" element={<AdminRoute><AdminArticlesPage /></AdminRoute>} />
+            <Route path="admin/audit" element={<AdminRoute><AdminAuditPage /></AdminRoute>} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Route>
         </Routes>
