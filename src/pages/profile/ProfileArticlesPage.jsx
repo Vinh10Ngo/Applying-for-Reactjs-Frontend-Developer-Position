@@ -5,18 +5,19 @@ import '../../components/layout/Layout.css'
 
 export default function ProfileArticlesPage() {
   const [articles, setArticles] = useState([])
+  const [includeDeleted, setIncludeDeleted] = useState(false)
   const [loading, setLoading] = useState(true)
 
   const load = () => {
     setLoading(true)
-    getMyArticles()
-      .then((list) => setArticles(Array.isArray(list) ? list : list?.items || []))
+    getMyArticles({ includeDeleted })
+      .then((res) => setArticles(res?.items ?? []))
       .finally(() => setLoading(false))
   }
 
   useEffect(() => {
     load()
-  }, [])
+  }, [includeDeleted])
 
   const handleDelete = (id, title) => {
     if (!window.confirm(`Xóa bài "${title}"? (soft delete)`)) return
@@ -29,6 +30,14 @@ export default function ProfileArticlesPage() {
       <p className="meta">Danh sách bài do mình tạo, có thể sửa/xóa.</p>
       <p>
         <Link to="/articles/new" className="btn btn-primary">+ Viết bài mới</Link>
+        <label style={{ marginLeft: '1rem' }}>
+          <input
+            type="checkbox"
+            checked={includeDeleted}
+            onChange={(e) => setIncludeDeleted(e.target.checked)}
+          />
+          {' '}Bao gồm bài đã xóa
+        </label>
       </p>
       {loading ? (
         <p>Đang tải...</p>
