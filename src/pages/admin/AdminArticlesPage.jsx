@@ -1,22 +1,43 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { getAdminArticles, deleteArticle, restoreArticle } from '../../api/articles'
+import { getUsers } from '../../api/users'
 import '../../components/layout/Layout.css'
 
 const LIMIT = 10
+const SORT_OPTIONS = [
+  { value: 'createdAt', label: 'Ngày tạo' },
+  { value: 'updatedAt', label: 'Ngày cập nhật' },
+  { value: 'title', label: 'Tiêu đề' },
+]
+const ORDER_OPTIONS = [
+  { value: 'desc', label: 'Mới nhất / Z→A' },
+  { value: 'asc', label: 'Cũ nhất / A→Z' },
+]
 
 export default function AdminArticlesPage() {
   const [data, setData] = useState({ items: [], total: 0, page: 1 })
   const [search, setSearch] = useState('')
   const [searchInput, setSearchInput] = useState('')
+  const [sort, setSort] = useState('createdAt')
+  const [order, setOrder] = useState('desc')
+  const [authorId, setAuthorId] = useState('')
+  const [users, setUsers] = useState([])
   const [loading, setLoading] = useState(true)
 
-  const fetchArticles = (page, searchTerm) => {
+  useEffect(() => {
+    getUsers().then((r) => setUsers(r?.items ?? [])).catch(() => setUsers([]))
+  }, [])
+
+  const fetchArticles = (page, searchTerm, sortVal, orderVal, authorFilter) => {
     setLoading(true)
     getAdminArticles({
       page,
       limit: LIMIT,
       search: (searchTerm && String(searchTerm).trim()) || undefined,
+      sort: sortVal,
+      order: orderVal,
+      authorId: (authorFilter && String(authorFilter).trim()) || undefined,
     })
       .then((res) => setData({
         items: res?.items ?? [],
@@ -29,8 +50,8 @@ export default function AdminArticlesPage() {
   }
 
   useEffect(() => {
-    fetchArticles(data.page, search)
-  }, [data.page, search])
+    fetchArticles(data.page, search, sort, order, authorId)
+  }, [data.page, search, sort, order, authorId])
 
   const handleSearch = (e) => {
     e?.preventDefault()
@@ -39,13 +60,26 @@ export default function AdminArticlesPage() {
     setData((d) => ({ ...d, page: 1 }))
   }
 
+  const handleSortChange = (newSort) => {
+    setSort(newSort)
+    setData((d) => ({ ...d, page: 1 }))
+  }
+  const handleOrderChange = (newOrder) => {
+    setOrder(newOrder)
+    setData((d) => ({ ...d, page: 1 }))
+  }
+  const handleAuthorChange = (newAuthorId) => {
+    setAuthorId(newAuthorId)
+    setData((d) => ({ ...d, page: 1 }))
+  }
+
   const handleDelete = (id, title) => {
     if (!window.confirm(`Xóa bài "${title}"?`)) return
-    deleteArticle(id).then(() => fetchArticles(data.page, search)).catch((e) => alert(e?.message || 'Xóa thất bại'))
+    deleteArticle(id).then(() => fetchArticles(data.page, search, sort, order, authorId)).catch((e) => alert(e?.message || 'Xóa thất bại'))
   }
 
   const handleRestore = (id) => {
-    restoreArticle(id).then(() => fetchArticles(data.page, search)).catch((e) => alert(e?.message || 'Khôi phục thất bại'))
+    restoreArticle(id).then(() => fetchArticles(data.page, search, sort, order, authorId)).catch((e) => alert(e?.message || 'Khôi phục thất bại'))
   }
 
   const totalPages = Math.ceil((data.total || 0) / LIMIT) || 1
@@ -67,6 +101,31 @@ export default function AdminArticlesPage() {
         />
         <button type="button" className="btn btn-primary" onClick={() => handleSearch()}>Tìm</button>
       </form>
+      <div className="admin-filters" style={{ display: 'flex', gap: '1rem', marginBottom: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
+        <label>
+          <span style={{ marginRight: '0.5rem' }}>Sắp xếp:</span>
+          <select value={sort} onChange={(e) => handleSortChange(e.target.value)} aria-label="Sắp xếp">
+            {SORT_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+          </select>
+        </label>
+        <label>
+          <span style={{ marginRight: '0.5rem' }}>Thứ tự:</span>
+          <select value={order} onChange={(e) => handleOrderChange(e.target.value)} aria-label="Thứ tự">
+            {ORDER_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+          </select>
+        </label>
+        <label>
+          <span style={{ marginRight: '0.5rem' }}>Tác giả:</span>
+          <select value={authorId} onChange={(e) => handleAuthorChange(e.target.value)} aria-label="Lọc theo tác giả">
+            <option value="">Tất cả</option>
+            {users.map((u) => (
+              <option key={u.id ?? u._id} value={u.id ?? u._id}>
+                {u.fullName || u.name || u.email || u.id}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
 
       {loading ? (
         <p>Đang tải...</p>
