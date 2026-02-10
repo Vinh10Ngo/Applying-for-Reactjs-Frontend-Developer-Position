@@ -21,11 +21,11 @@ function normalizeArticle(a) {
   }
 }
 
-/** Build query: frontend gửi page, limit, search_term; backend nhận đúng tên. */
+/** Build query: frontend gửi page, limit, search_term, sort, order, authorId; backend nhận đúng tên. */
 function toQuery(params) {
   const q = { ...params }
   if (q.publishedOnly !== undefined) {
-    q.published = q.publishedOnly
+    q.published = q.publishedOnly === true || q.publishedOnly === 'true'
     delete q.publishedOnly
   }
   if (q.search !== undefined && q.search_term === undefined) {
@@ -50,17 +50,20 @@ export async function getArticleById(id) {
   return normalizeArticle(a)
 }
 
-export async function getMyArticles() {
+/** GET /articles/me – bài của user đăng nhập. params.includeDeleted = true để lấy cả bài đã xóa. */
+export async function getMyArticles(params = {}) {
   const token = getToken()
-  if (!token) return []
+  if (!token) return { items: [] }
   if (useMock) {
     const user = await mockApi.getMe(token)
     const userId = user?.id ?? user?._id
-    return userId ? mockApi.getArticlesByAuthor(userId) : []
+    const list = userId ? mockApi.getArticlesByAuthor(userId) : []
+    return { items: list.map(normalizeArticle) }
   }
-  const res = await request('/articles/me').catch(() => ({ items: [] }))
+  const query = params.includeDeleted ? '?includeDeleted=true' : ''
+  const res = await request(`/articles/me${query}`).catch(() => ({ items: [] }))
   const list = Array.isArray(res) ? res : (res?.items ?? [])
-  return list.map(normalizeArticle)
+  return { items: list.map(normalizeArticle) }
 }
 
 export async function createArticle(data) {
@@ -96,24 +99,26 @@ export async function restoreArticle(id) {
   return request(`/articles/${id}/restore`, { method: 'PATCH' })
 }
 
-/** GET /articles/admin – danh sách tất cả bài (nháp, đã xuất bản, đã xóa). page, limit (tối đa 50), search_term. */
+/** GET /articles/admin – sort: createdAt|updatedAt|title, order: asc|desc, authorId (ObjectId). */
 export async function getAdminArticles(params = {}) {
   const opts = {
-    publishedOnly: false,
-    includeDeleted: true,
     page: params.page ?? 1,
     limit: Math.min(50, params.limit ?? 10),
     search: params.search ?? '',
+    sort: params.sort ?? 'createdAt',
+    order: params.order ?? 'desc',
+    authorId: params.authorId ?? '',
     ...params,
   }
   opts.limit = Math.min(50, opts.limit)
-  if (useMock) return mockApi.getArticles(opts)
+  if (useMock) return mockApi.getArticles({ ...opts, includeDeleted: true })
   const adminQuery = new URLSearchParams()
   adminQuery.set('page', opts.page)
   adminQuery.set('limit', opts.limit)
-  if (opts.search && String(opts.search).trim()) {
-    adminQuery.set('search_term', String(opts.search).trim())
-  }
+  if (opts.search && String(opts.search).trim()) adminQuery.set('search_term', String(opts.search).trim())
+  if (opts.sort) adminQuery.set('sort', opts.sort)
+  if (opts.order) adminQuery.set('order', opts.order)
+  if (opts.authorId && String(opts.authorId).trim()) adminQuery.set('authorId', String(opts.authorId).trim())
   const query = adminQuery.toString()
   const res = await request(`/articles/admin?${query}`).catch(() => ({ items: [], total: 0 }))
   const raw = res?.items ?? res?.data ?? []
